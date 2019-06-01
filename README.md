@@ -12,20 +12,21 @@
   * [Object Glove Embedding](https://uofi.box.com/s/42h03v8v1zgul7ae8qyuubp6dovrt3vq)
 
 * Overall structure
-  |---- vrd<br/>
-  |-------- annotation_train.mat<br/>
-  |-------- annotation_test.mat<br/>
-  |-------- objectListN.mat<br/>
-  |-------- predicate.mat<br/>
-  |-------- images<br/>
-  |------------ sg_train_images<br/>
-  |------------ sg_test_images<br/>
-  |-------- test<br/>
-  |------------ multi_vgg16_test_dict.pkl<br/>
-  |-------- train<br/>
-  |------------ multi_vgg16_train_dict.pkl<br/>
-  |-------- val<br/>
-  |------------ multi_vgg16_val_dict.pkl<br/>
+
+  ├── vrd<br/>
+       ├── annotation_train.mat<br/>
+       ├── annotation_test.mat<br/>
+       ├── objectListN.mat<br/>
+       ├── predicate.mat<br/>
+       ├── images<br/>
+            ├── sg_train_images<br/>
+            ├── sg_test_images<br/>
+       ├── test<br/>
+            ├── multi_vgg16_test_dict.pkl<br/>
+       ├── train<br/>
+            ├── multi_vgg16_train_dict.pkl<br/>
+       ├── val<br/>
+            ├── multi_vgg16_val_dict.pkl<br/>
 
 ## Usage
 * Training
