@@ -12,20 +12,20 @@
   * [Object Glove Embedding](https://uofi.box.com/s/42h03v8v1zgul7ae8qyuubp6dovrt3vq)
 
 * Overall structure
-  |---- vrd
-  |-------- annotation_train.mat
-  |-------- annotation_test.mat
-  |-------- objectListN.mat
-  |-------- predicate.mat
-  |-------- images
-  |------------ sg_train_images
-  |------------ sg_test_images
-  |-------- test
-  |------------ multi_vgg16_test_dict.pkl
-  |-------- train
-  |------------ multi_vgg16_train_dict.pkl
-  |-------- val
-  |------------ multi_vgg16_val_dict.pkl
+  |---- vrd<br/>
+  |-------- annotation_train.mat<br/>
+  |-------- annotation_test.mat<br/>
+  |-------- objectListN.mat<br/>
+  |-------- predicate.mat<br/>
+  |-------- images<br/>
+  |------------ sg_train_images<br/>
+  |------------ sg_test_images<br/>
+  |-------- test<br/>
+  |------------ multi_vgg16_test_dict.pkl<br/>
+  |-------- train<br/>
+  |------------ multi_vgg16_train_dict.pkl<br/>
+  |-------- val<br/>
+  |------------ multi_vgg16_val_dict.pkl<br/>
 
 ## Usage
 * Training
@@ -34,7 +34,8 @@ python train.py
 ```
 Also check the available arguments inside `options/`
 
-* Testing<br/>
+* Testing
+
 First generate the matlab format detection
 ```python
 python test.py
