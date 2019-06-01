@@ -13,7 +13,8 @@
 
 * Overall structure
 
-  +-- vrd  
+```bash
+  +-- data  
       +-- annotation_train.mat  
       +-- annotation_test.mat  
       +-- objectListN.mat  
@@ -27,6 +28,7 @@
       |   +-- multi_vgg16_train_dict.pkl  
       +-- val  
       |   +-- multi_vgg16_val_dict.pkl  
+```
 
 ## Usage
 * Training
