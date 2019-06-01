@@ -13,25 +13,25 @@
 
 * Overall structure
 
-  ├── vrd<br/>
-       ├── annotation_train.mat<br/>
-       ├── annotation_test.mat<br/>
-       ├── objectListN.mat<br/>
-       ├── predicate.mat<br/>
-       ├── images<br/>
-            ├── sg_train_images<br/>
-            ├── sg_test_images<br/>
-       ├── test<br/>
-            ├── multi_vgg16_test_dict.pkl<br/>
-       ├── train<br/>
-            ├── multi_vgg16_train_dict.pkl<br/>
-       ├── val<br/>
-            ├── multi_vgg16_val_dict.pkl<br/>
+  +-- vrd
+      +-- annotation_train.mat
+      +-- annotation_test.mat
+      +-- objectListN.mat
+      +-- predicate.mat
+      +-- images
+      |   +-- sg_train_images
+      |   +-- sg_test_images
+      +-- test
+      |   +-- multi_vgg16_test_dict.pkl
+      +-- train
+      |   +-- multi_vgg16_train_dict.pkl
+      +-- val
+      |   +-- multi_vgg16_val_dict.pkl
 
 ## Usage
 * Training
 ```python
-python train.py 
+python train.py --data_root data/
 ```
 Also check the available arguments inside `options/`
 
@@ -39,7 +39,7 @@ Also check the available arguments inside `options/`
 
 First generate the matlab format detection
 ```python
-python test.py
+python test.py --which_epoch union_best_sgd
 ```
 Also check the available arguments inside `options/`
 
