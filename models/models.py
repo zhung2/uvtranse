@@ -105,8 +105,6 @@ class Model(object):
         self.C = opt.balance 
         if self.C:
             self.constriant = L2Loss.L2Loss()
-            #self.constriant = nn.MSELoss()
-            #self.constriant = nn.L1Loss()
 
         # Load prior statistics
         self.setup_prior()
@@ -121,32 +119,9 @@ class Model(object):
 
         if self.isTrain:
             initialize.init_weights(self.model, init_type=opt.init_type)
-            '''
-            self.optimizer = torch.optim.Adam(self.model.parameters(), lr = opt.lr, 
-                                              betas=(opt.beta1, 0.999), 
-                                              weight_decay=opt.weight_decay)
-            '''
-            '''
-            params = []
-            for key, value in dict(self.model.named_parameters()).items():
-                if value.requires_grad:
-                    if 'bias' in key:
-                        params += [{'params':[value],'lr':self.opt.lr*(0 + 1), \
-                                    'weight_decay': 0}]
-                    else:
-                        params += [{'params':[value],'lr':self.opt.lr, 'weight_decay': self.opt.weight_decay}]
-            '''
 
-            '''
             self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.opt.lr, momentum=0.9,
                                               weight_decay=self.opt.weight_decay)
-            '''
-            #'''
-            self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.opt.lr,
-                                              weight_decay=self.opt.weight_decay)
-            #'''
-            #self.optimizer = torch.optim.RMSprop(self.model.parameters(), lr=self.opt.lr,
-                                                 #weight_decay=self.opt.weight_decay, momentum=0.0)
             self.scheduler = initialize.get_scheduler(self.optimizer, opt)
             if opt.continue_train:
                 self.load_model(opt.which_epoch)
@@ -207,19 +182,10 @@ class Model(object):
             obj_vec, union_vec = self.model(self.sub_loc[0], self.sub_fc7[0], self.obj_loc[0],
                                             self.obj_fc7[0], self.union_loc[0], self.union_fc7[0],
                                             self.sub_wordemb[0], self.obj_wordemb[0], self.pred_wordemb[0])
-            '''
-            pred_predict = self.model(self.sub_loc[0], self.sub_fc7[0], self.obj_loc[0],
-                                      self.obj_fc7[0], self.union_loc[0], self.union_fc7[0],
-                                      self.sub_wordemb[0], self.obj_wordemb[0], self.pred_wordemb[0])
-            '''
         else:
             pred_predict, sub_vec, \
             obj_vec, union_vec = self.model(self.sub_loc[0], self.sub_fc7[0], self.obj_loc[0],
                                             self.obj_fc7[0], self.union_loc[0], self.union_fc7[0])
-            '''
-            pred_predict = self.model(self.sub_loc[0], self.sub_fc7[0], self.obj_loc[0],
-                                      self.obj_fc7[0], self.union_loc[0], self.union_fc7[0])
-            '''
 
         if self.final_layer:
             if self.opt.use_lang:
@@ -241,71 +207,17 @@ class Model(object):
             pred_predict = pred_predict * 1.0 * rule_constraint.cpu().numpy()
             pred_predict = pred_predict / (np.linalg.norm(pred_predict, ord=2, axis=1, keepdims=True) + 1e-8)
 
-        #pred_predict = pred_predict.data.cpu().numpy()
-        #indices = np.argsort(pred_predict, axis=1)
-        #indices = indices[:, :65]
-        #row_ind = np.arange(len(pred_predict))[:, None]
-        #pred_predict[row_ind, indices] = 0.
-        '''
-        norm = np.linalg.norm(pred_predict, axis=1, keepdims=True)
-        norm[norm == 0] = 1.
-        pred_predict = pred_predict / norm
-        print(max(pred_predict), min(pred_predict))
-        '''
-        '''
-        for i in range(len(pred_predict)):
-            print(np.amax(pred_predict[i, :]), np.amin(pred_predict[i, :]))
-        import sys
-        sys.exit(1)
-        '''
-        '''
-        pred_predict[pred_predict < 5.] = 0.
-        max_vals = np.amax(pred_predict, axis=1, keepdims=True)
-        pred_predict = pred_predict / max_vals
-        '''
-        #pred_predict_exp = np.exp(pred_predict - max_val)
-        #pred_predict_exp = pred_predict_exp * ((pred_predict != 0).astype('float'))
-        '''
-        pred_predict_max = np.amax(pred_predict, axis=1, keepdims=True)
-        pred_predict_exp = np.exp(pred_predict - pred_predict_max)
-        pred_predict_exp = pred_predict_exp * ((pred_predict != 0).astype('float'))
-        pred_predict = pred_predict_exp / (np.sum(pred_predict_exp, axis=1, keepdims=True) + 1e-10)
-        '''
-
-        #print('Originally:', len(pred_predict) * 70, 'After prune:', (pred_predict > 1e-7).sum(), '\n')
-        '''
-        print('Number of rels: {:d}, After prune (rels per pair): {:.2f}'.format(
-              len(pred_predict), (pred_predict > 0.).sum() / float(len(pred_predict))), '\n')
-        '''
-        
-        #pred_predict[pred_predict < 10.] = 0.
-        #y = np.exp(pred_predict - pred_predict.max(axis=1, keepdims=True))
-        #pred_predict = y / y.sum(axis=1, keepdims=True)
-        #norm = np.linalg.norm(pred_predict, axis=1, keepdims=True)
-        #norm[norm == 0] = 1.
-        #pred_predict = pred_predict / norm
-        #print(np.count_nonzero(pred_predict))
-        #pred_predict = torch.normalize(pred_predict, dim=1).data.cpu().numpy()
 
         return pred_predict
 
     def get_author_test_result(self):
         """Run network and return scores for 70 predicates for sub/objs"""
         if self.opt.use_lang:
-            '''
-            pred_predict = self.model(self.sub_loc, self.sub_fc7, self.obj_loc,
-                                      self.obj_fc7, self.union_loc, self.union_fc7,
-                                      self.sub_wordemb, self.obj_wordemb, self.pred_wordemb)
-            '''
             pred_predict, vis_pred, \
             sub_vec, obj_vec, union_vec = self.model(self.sub_loc, self.sub_fc7, self.obj_loc,
                                                      self.obj_fc7, self.union_loc, self.union_fc7,
                                                      self.sub_wordemb, self.obj_wordemb, self.pred_wordemb)
         else:
-            '''
-            pred_predict = self.model(self.sub_loc, self.sub_fc7, self.obj_loc,
-                                      self.obj_fc7, self.union_loc, self.union_fc7)
-            '''
             pred_predict, sub_vec, obj_vec, union_vec = self.model(self.sub_loc, self.sub_fc7, self.obj_loc,
                                                                    self.obj_fc7, self.union_loc, self.union_fc7)
         #pred_predict = self.model((self.sub_loc, self.sub_fc7, self.obj_loc,
@@ -339,11 +251,6 @@ class Model(object):
             or self.criterion.__class__.__name__ == 'WeightedBCEWithLogitsLoss':
             if self.similarity_mat is not None:
                 pred_label_onehot = self.similarity_mat[predicate_id.long()]
-                #torch.set_printoptions(threshold=10000)
-                #print(self.similarity_mat[3])
-                #print(predicate_id)
-                #print(pred_label)
-                #assert pred_label.size(0) == predicate_id.shape[0]
             else:
                 pred_label_onehot = torch.FloatTensor(predicate_id.shape[0], 70)
                 pred_label_onehot.zero_()
@@ -384,21 +291,12 @@ class Model(object):
         self.model.eval()
         self.forward()
         if self.opt.use_lang:
-            '''
-            pred_predict = self.model(self.sub_loc, self.sub_fc7, self.obj_loc,
-                                      self.obj_fc7, self.union_loc, self.union_fc7,
-                                      self.sub_wordemb, self.obj_wordemb, self.pred_wordemb)
-            '''
             pred_predict, vis_pred,  \
             sub_vec, obj_vec, union_vec = self.model(self.sub_loc, self.sub_fc7, self.obj_loc,
                                                      self.obj_fc7, self.union_loc, self.union_fc7,
                                                      self.sub_wordemb, self.obj_wordemb, self.pred_wordemb)
 
         else:
-            '''
-            pred_predict = self.model(self.sub_loc, self.sub_fc7, self.obj_loc,
-                                      self.obj_fc7, self.union_loc, self.union_fc7)
-            '''
             pred_predict, sub_vec, obj_vec, union_vec = self.model(self.sub_loc, self.sub_fc7, self.obj_loc,
                                                                    self.obj_fc7, self.union_loc, self.union_fc7)
 
@@ -418,13 +316,8 @@ class Model(object):
                 sub_vec_norm = sub_vec.norm(p=2, dim=1)
                 obj_vec_norm = obj_vec.norm(p=2, dim=1)
                 union_vec_norm = union_vec.norm(p=2, dim=1)
-                #target_two_norm = 3 * target_one_norm
                 #target_two_norm = target_one_norm
                 target_two_norm = Variable(1*target_one_norm.data, requires_grad=False)
-                '''
-                loss += self.C * (self.constriant(sub_vec, target_one_norm) + self.constriant(obj_vec, target_one_norm)
-                                  + self.constriant(union_vec, target_two_norm))
-                '''
                 loss += self.C * (self.constriant(sub_vec_norm, target_one_norm) + \
                                   self.constriant(obj_vec_norm, target_one_norm) + \
                                   self.constriant(union_vec_norm, target_two_norm))
@@ -450,20 +343,11 @@ class Model(object):
 
     def backward_loss(self):
         if self.opt.use_lang:
-            '''
-            pred_predict = self.model(self.sub_loc, self.sub_fc7, self.obj_loc,
-                                      self.obj_fc7, self.union_loc, self.union_fc7,
-                                      self.sub_wordemb, self.obj_wordemb, self.pred_wordemb)
-            '''
             pred_predict, vis_pred, \
             sub_vec, obj_vec, union_vec = self.model(self.sub_loc, self.sub_fc7, self.obj_loc,
                                                      self.obj_fc7, self.union_loc, self.union_fc7,
                                                      self.sub_wordemb, self.obj_wordemb, self.pred_wordemb)
         else:
-            '''
-            pred_predict = self.model(self.sub_loc, self.sub_fc7, self.obj_loc,
-                                      self.obj_fc7, self.union_loc, self.union_fc7)
-            '''
             pred_predict, sub_vec, obj_vec, union_vec = self.model(self.sub_loc, self.sub_fc7, self.obj_loc,
                                                                    self.obj_fc7, self.union_loc, self.union_fc7)
 
@@ -485,10 +369,6 @@ class Model(object):
                 #target_two_norm = 3 * target_one_norm
                 #target_two_norm = target_one_norm
                 target_two_norm = Variable(1 * target_one_norm.data, requires_grad=False)
-                '''
-                loss += self.C * (self.constriant(sub_vec, target_one_norm) + self.constriant(obj_vec, target_one_norm)
-                                  + self.constriant(union_vec, target_two_norm))
-                '''
                 loss += self.C * (self.constriant(sub_vec_norm, target_one_norm) + \
                                   self.constriant(obj_vec_norm, target_one_norm) + \
                                   self.constriant(union_vec_norm, target_two_norm))
@@ -579,16 +459,6 @@ class Model(object):
                 # Background should be 0
                 self.relevance[0, :] = 0
                 self.relevance[:, 0] = 0
-                '''
-                cnt = 0
-                for i in range(self.relevance.shape[0]):
-                    for j in range(self.relevance.shape[1]):
-                        if self.relevance[i, j] > 0.5:
-                            print(i, j, self.relevance[i, j])
-                            cnt += 1
-                print('total > 0.5:', cnt)
-                sys.exit(1)
-                '''
             else:
                 self.relevance = None
         else:

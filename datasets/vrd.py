@@ -17,14 +17,8 @@ from torch.utils import data
 from tqdm import tqdm
 import pdb
 
-#sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
-#from utils.evaluation import top_recall_phrase
-#from utils.evaluation import top_recall_relationship
-#from utils.evaluation import setup
-#import utils.evaluation as evaluation
 from evaluation.evaluation import top_recall_phrase
 from evaluation.evaluation import top_recall_relationship
-from evaluation.evaluation import top_recall_predicate
 from evaluation.evaluation import setup
 
 def bbox_transform(ex_rois, gt_rois, im_w, im_h):
@@ -136,29 +130,13 @@ def get_inter_over_union(ex_rois, gt_rois):
     #print(targets_inter_union)
     return targets_inter_union
 
-def union_bbox_transform(union_box, sub_box, obj_box, h, w):
-    '''
-    union_xmin = union_box[:, 0] / float(w)
-    union_xmax = union_box[:, 2] / float(w)
-    union_ymin = union_box[:, 1] / float(h)
-    union_ymax = union_box[:, 3] / float(h)
-    #log_inter_over_union = get_inter_over_union(sub_box, obj_box)
-
-    targets = np.vstack(
-        (union_xmin, union_xmax, union_ymin, union_ymax)).transpose()
-    '''
-    union_w = union_box[:, 2] - union_box[:, 0] + 1.0
-    union_h = union_box[:, 3] - union_box[:, 1] + 1.0
-    targets = np.vstack(
-        (union_box[:, 0], union_box[:, 1], union_w, union_h)).transpose()
-    return targets
 
 def load_word_emb(dataroot):
-    predicate_emb = torch.load(os.path.join(dataroot, 'pred_emb.pth'))
+    #predicate_emb = torch.load(os.path.join(dataroot, 'pred_emb.pth'))
     object_emb = torch.load(os.path.join(dataroot, 'obj_emb.pth'))
     #print('predicate embedding shape:', predicate_emb.size())
     #print('object embedding shape:', object_emb.size())
-    return object_emb.numpy(), predicate_emb.numpy()
+    return object_emb.numpy()#, predicate_emb.numpy()
 
 def get_obj_wordemb(sub_obj_id, object_emb):
     sub_wordemb = np.zeros((len(sub_obj_id), object_emb.shape[1]))
@@ -178,14 +156,7 @@ class VrdDataset(data.Dataset):
             dataset_name (string): 'vrd'
         """
         self.root = root
-        #data_file = os.path.join(root, split, split+'_dict.pkl')
         data_file = os.path.join(root, split, 'multi_'+ net + '_' + split+'_dict.pkl')
-        #data_file = os.path.join(root, split, '1_33_multi_vgg16_best_test_dict.pkl')
-        # gt test
-        self.use_gt = use_gt
-        if self.use_gt:
-            assert split == 'test', "Can only use gt test when split == test for evaluation"
-            data_file = os.path.join(root, split, 'multi_'+ net + '_' + split+'_gt_dict.pkl')
 
         with open(data_file, 'rb') as f:
             self.data_dict = pickle.load(f)
@@ -265,7 +236,7 @@ class VrdDataset(data.Dataset):
                                              self.data_dict[idx]['im_h'])
 
             if self.use_lang:
-                sub_wordemb, obj_wordemb = get_obj_wordemb(self.data_dict[idx]['sub_obj'], self.word_emb[0])
+                sub_wordemb, obj_wordemb = get_obj_wordemb(self.data_dict[idx]['sub_obj'], self.word_emb)
 
                 return {
                     'sub_fc7': self.data_dict[idx]['feat']['sub_fc7'].astype(np.float32), 
@@ -354,8 +325,8 @@ class VrdDataset(data.Dataset):
                 for i in range(len(anno)):
                     data_list.append([sub_loc[i], obj_loc[i], union_loc[i],
                                       sub_fc7[i], obj_fc7[i], union_fc7[i],
-                                      anno[i], im_w, im_h, self.word_emb[0][anno[i, 0]-1], 
-                                      self.word_emb[0][anno[i, 1]-1]])
+                                      anno[i], im_w, im_h, self.word_emb[anno[i, 0]-1], 
+                                      self.word_emb[anno[i, 1]-1]])
         return data_list
 
     # Objects/relations id part
@@ -408,10 +379,5 @@ class VrdDataset(data.Dataset):
         print('Phrase Det. R@100: {:.02f}'.format(100 * recall100_p))
         print('Phrase Det. R@50: {:.02f}'.format(100 * recall50_p))
 
-        if self.use_gt:
-            recall100_pre = top_recall_predicate(100, all_tuple_path)
-            recall50_pre = top_recall_predicate(50, all_tuple_path)
-            print('Predicate Det. R@100: {:.02f}'.format(100 * recall100_pre))
-            print('Predicate Det. R@50: {:.02f}'.format(100 * recall50_pre))
 
 
